@@ -1,6 +1,5 @@
 import os
-from PyPDF2 import PdfReader
-from io import BytesIO
+from pypdf import PdfReader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from dotenv import load_dotenv
 
