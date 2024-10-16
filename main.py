@@ -1,5 +1,6 @@
 import os
-from pypdf import PdfReader
+from PyPDF2 import PdfReader
+from io import BytesIO
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from dotenv import load_dotenv
 
@@ -35,7 +36,7 @@ def get_text_chunks(text):
 
 # Convert the chunks into vector
 def get_vector_store(text_chunks):
-    embeddings = GoogleGenerativeAIEmbeddings(model='models/embeddings-001')
+    embeddings = GoogleGenerativeAIEmbeddings(model='models/embedding-001')
     # Faiss takes all the text_chunks and embed according to the 
     # embedding that I have initialized
     vector_store = FAISS.from_texts(text_chunks, embedding = embeddings)
@@ -61,8 +62,8 @@ def get_conversational_chain():
     return chain
 
 def user_input(user_question):
-    embeddings = GoogleGenerativeAIEmbeddings(model='models/embeddings-001')
-    new_db = FAISS.load_local('faiss_index', embeddings)
+    embeddings = GoogleGenerativeAIEmbeddings(model='models/embedding-001')
+    new_db = FAISS.load_local('faiss_index', embeddings, allow_dangerous_deserialization=True)
     docs = new_db.similarity_search(user_question)
 
     chain = get_conversational_chain()
@@ -87,7 +88,7 @@ def main():
 
     with st.sidebar:
         st.title('Menu: ')
-        pdf_docs = st.file_uploader('Upload your PDF Files and Click on the Submit ')
+        pdf_docs = st.file_uploader('Upload your PDF Files and Click on the Submit ',type=['pdf'], accept_multiple_files=True)
         if st.button('Submit & Process'):
             with st.spinner('Processing...'):
                 raw_text = get_pdf_text(pdf_docs)
